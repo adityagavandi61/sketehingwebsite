@@ -1,0 +1,128 @@
+{% extends "index.html" %} 
+{% block title %}Cart{% endblock title %}
+{% block cart %}
+<div class="cart-container">
+  <div class="cart-header">
+    <h2>My Cart</h2>
+    <!-- <button class="empty-cart-btn">🗑️ Empty Cart</button> -->
+  </div>
+  <form method="POST" action="{% url 'order' %}">
+  {% csrf_token %}
+  <table class="cart-table">
+    <thead>
+      <tr>
+        <th>Index</th>
+        <th>Product</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Total Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in cartitems %}
+      <tr style="border-bottom: 1px solid #e0e0e0">
+        <td></td>
+        <td>
+          <div class="product-image red">
+            <img
+              src="{{ c.product.img.url }}"
+              style="width: 40px; height: 40px; object-fit: cover"
+              alt=""
+              srcset=""
+            />
+          </div>
+        </td>
+        <td>{{c.product.title }}</td>
+        <td>₹ {{c.product.price }}</td>
+        <td class="qty-control">
+          <button type="button" class="qty-btn" style="font-size: 25px">-</button>
+          <input id="qyt" type="number" name="quantity_{{ c.id }}" value="{{ c.quantity }}" min="1"/>
+          <button type="button" class="qty-btn" style="font-size: 25px">+</button>
+        </td>
+        <td>₹ {{c.product.price }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="buy">
+    <div class="cart-summary">
+      <p>Items in Cart : <span></span></p>
+      <p>Total Price : <span></span></p>
+    </div>
+  </div>
+  <button type="submit" class="button-24" role="button">Place Order</button>
+</form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const cartTable = document.querySelector(".cart-table");
+
+    cartTable.addEventListener("click", function (event) {
+      // Check if the clicked element is a quantity button
+      if (event.target.classList.contains("qty-btn")) {
+        const qtyControl = event.target.closest(".qty-control");
+        const inputField = qtyControl.querySelector("input");
+        let currentQty = parseInt(inputField.value);
+
+        // Check if the plus or minus button was clicked
+        if (event.target.textContent === "+") {
+          currentQty++;
+        } else if (event.target.textContent === "-" && currentQty > 1) {
+          currentQty--;
+        }
+
+        document.querySelector("#qyt").setAttribute("value", currentQty);
+        // Update the value of the specific input field
+        inputField.value = currentQty;
+        updateTotalAmount(event.target.closest("tr"));
+        updateCartSummary();
+      }
+    });
+
+    // Function to update the total amount for the specific row
+    function updateTotalAmount(row) {
+      const priceCell = row
+        .querySelector("td:nth-child(4)")
+        .textContent.replace("₹", "")
+        .trim();
+      const price = parseFloat(priceCell);
+      const qty = parseInt(row.querySelector("input").value);
+      const totalAmountCell = row.querySelector("td:last-child");
+
+      totalAmountCell.textContent = `₹ ${price * qty}`;
+    }
+
+    // Function to update the cart summary
+    function updateCartSummary() {
+      const cartRows = document.querySelectorAll(".cart-table tbody tr");
+      let totalItems = 0;
+      let totalPrice = 0;
+
+      cartRows.forEach((row,index) => {
+        const indexCell = row.cells[0]; 
+        indexCell.textContent = index + 1; 
+
+        const qty = parseInt(row.querySelector("input").value);
+        const totalAmount = parseFloat(
+          row.querySelector("td:last-child").textContent.replace("₹", "").trim()
+        );
+
+        totalItems += qty;
+        totalPrice += totalAmount;
+      });
+
+      document.querySelector(".cart-summary p:nth-child(1) span").textContent =
+        totalItems;
+      document.querySelector(
+        ".cart-summary p:nth-child(2) span"
+      ).textContent = `₹ ${totalPrice}`;
+    }
+
+    // Initial calculation for page load
+    updateCartSummary();
+  });
+
+</script>
+{% endblock %}

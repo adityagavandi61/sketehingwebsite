@@ -1,0 +1,25 @@
+{% extends "index.html" %}
+{% block title %}Home{% endblock title %}
+ {% block contain %}
+<div class="products">
+  {% for p in Product %}
+  <form action="{% url 'cart' p.id %}" method="POST" class="product">
+    {% csrf_token %}
+    <img
+      src="{{ p.img.url }}"
+      style="width: 200px; height: 200px"
+      alt="{{p.title}}"
+    />
+    <h2>{{ p.title }}</h2>
+    <p>{{ p.desc }}</p>
+    <p class="price">₹ {{p.price}}</p>
+    <input hidden type="text" value="{{ user }}" />
+    <input hidden type="text" value="{{ p.title }}" />
+    <div class="buttons">
+      <button type="submit">Add to Cart</button>
+    </div>
+  </form>
+  {% endfor %}
+</div>
+
+{% endblock %}

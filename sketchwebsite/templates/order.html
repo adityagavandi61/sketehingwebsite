@@ -1,0 +1,39 @@
+{% extends "index.html" %} 
+
+{% block title %}Orders{% endblock title %}
+
+{% block order %}
+    {% if orders %}
+    <div class="order-list">
+        {% for order in orders %}
+        <div class="order-item">
+            <div class="order-header">
+                <div class="order-info">
+                    <span class="order-date">{{ order.created_at }}</span>
+                </div>
+                <div class="order-total">Total: <strong>₹ {{ order.total_amount }}</strong></div>
+            </div>
+            <div class="order-content">
+                <div class="product-thumbnails">
+                    {% for order_product in order.order_products.all %}
+                    <img src="{{ order_product.product.img.url }}" style="object-fit: cover;" alt="{{ order_product.product.img.url }}">
+                    {% endfor %}
+                </div>
+                <div class="product-details">
+                    <h4>Items:</h4>
+                    <ul>
+                        {% for order_product in order.order_products.all %}
+                        <li>•  {{ order_product.quantity }} the {{ order_product.product.title }}</li>
+                        
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <p>You have not placed any orders yet.</p>
+    {% endif %} 
+
+{% endblock %}
